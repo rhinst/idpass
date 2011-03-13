@@ -1,0 +1,40 @@
+body,p,td,div,span{
+	font-family: verdana, arial, sans-serif;
+}
+
+body {
+	background-color: #fff;
+}
+
+div#header {
+	background-image: url('../images/logo.jpg');
+	background-repeat: no-repeat;
+	background-color: #224;
+	height: 140px;
+	width: 1024px;
+	color: #fff;
+	font-size: 12px;
+}
+
+div#header p {
+	margin-left: 302px;
+	padding: 5px;
+}
+
+div#footer {
+	height: 50px;
+	width: 1024px;
+	color: #000;
+	background-color: #fff;
+	font-size: 10px;
+	text-align: center;
+}
+
+.excel {
+	background-image:url('../images/excel_icon.gif') !important;
+}
+
+.print {
+	background-image:url('../images/print_icon.gif') !important;
+}
+

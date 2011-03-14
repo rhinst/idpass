@@ -1,11 +1,11 @@
 IDentiPASS Reporting App
 ========================
 
-This software was written to provide reporting/auditing utilities for IDentiPas-based ID card systems.
+This software was written to provide basic reporting/auditing utilities for IDentiPas-based ID card systems.
 
 Requirements:
 PHP 5.1.6 or newer, with ODBC database support
 
-This software is based on the CodeIgniter framework (http://www.codeigniter.com) and also makes use of the PEAR framework (http://pear.php.net).
+This software is based on the CodeIgniter framework (http://www.codeigniter.com) and also makes use of the PEAR framework (http://pear.php.net), jquery (http://www.jquery.com) and ExtJS (http://www.sencha.com/products/extjs/)
 
 For questions/comments, contact Rob Hinst <rob@hinst.net>

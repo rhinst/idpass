@@ -1,5 +1,14 @@
 Ext.onReady(function() {
 
+	function renderAction(s) {
+		if(parseInt(s) < 120000) {
+			return('<img src="images/enter.png" border="0">');
+		}
+		else {
+			return('<img src="images/exit.png" border="0">');
+		}
+	}
+
 	function renderDate(s) {
 		var year=s.substr(0,4);
 		var month=s.substr(4,2);
@@ -86,6 +95,7 @@ Ext.onReady(function() {
 		items: [
 			{
 				fieldLabel: 'Type',
+				id: 'attendanceReportType',
 				xtype: 'combo',
 				editable: false,
 				triggerAction: 'all',
@@ -103,6 +113,7 @@ Ext.onReady(function() {
 			},
 			{
 				fieldLabel: 'Sort By',
+				id: 'sortBy',
 				xtype: 'combo',
 				editable: false,
 				triggerAction: 'all',
@@ -121,7 +132,8 @@ Ext.onReady(function() {
 			{
 				fieldLabel: 'Date',
 				width: 100,
-				xtype: 'datefield'
+				xtype: 'datefield',
+				id: 'attendanceReportDate'
 			},
 			{
 				fieldLabel: 'WIB Report',
@@ -133,10 +145,16 @@ Ext.onReady(function() {
 			{ 
 				text: 'Run Report',
 				handler: function() {
+					var type = Ext.getCmp('attendanceReportType').getValue();
+					var sortBy = Ext.getCmp('sortBy').getValue();
+					var date = $('#attendanceReportDate').val();
+					var wib = $('#userWIBReport');
 					resultsStore.baseParams = {
-						id: 123,
-						fromDate: 11111,
-						toDate: 2222
+						type: type,
+						sortBy: sortBy,
+						fromDate: date,
+						toDate: date,
+						wib: wib
 					};
 					resultsStore.reload();
 				}
@@ -208,9 +226,10 @@ Ext.onReady(function() {
 		loadMask: true,
 		colModel: new Ext.grid.ColumnModel({
 			columns: [
+				{header: 'Action', dataIndex: 'rtime', width: 50, 'sortable': false, renderer: renderAction},
 				{header: 'Name', dataIndex: 'name', width: 220, 'sortable': true},
 				{header: 'Date', dataIndex: 'rdate', width: 100, 'sortable': true, renderer: renderDate},
-				{header: 'Time', dataIndex: 'rtime', width: 100, 'sortable': true, renderer: renderTime},
+				{header: 'Time', dataIndex: 'rtime', width: 80, 'sortable': true, renderer: renderTime},
 				{header: 'ID', dataIndex: 'CardNumber', width: 100, 'sortable': true},
 				{header: 'Panel', dataIndex: 'panel', width: 150, 'sortable': true}
 			]

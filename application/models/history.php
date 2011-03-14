@@ -47,7 +47,8 @@ class History extends CI_Model {
 
 	function getList($params = Array()) {
 		$ci =& get_instance();
-		$sql = "SELECT C.FirstName, C.LastName, CLng(C.CardNum) as CardNumber, R.Name as panel, H.RDate as rdate, H.RTime as rtime FROM (History H LEFT OUTER JOIN Cards C ON (C.CardNum=H.CardNumber)) LEFT OUTER JOIN Readers R ON (R.SitePanelId=H.SitePanelId AND CLng(R.Point)=(CLng(H.TransInfo)+1)) WHERE 1=1";
+
+		$sql = "SELECT C.FirstName, C.LastName, CLng(C.CardNum) as CardNumber, R.Name as panel, H.RDate as rdate, H.RTime as rtime FROM (History H LEFT OUTER JOIN Cards C ON (C.CardNum=H.CardNumber)) LEFT OUTER JOIN Readers R ON (R.SitePanelId=H.SitePanelId AND CLng(R.Point)=(CLng(H.TransInfo)+1)) WHERE 1=1 AND C.CardNum > 0 ";
 		if(isset($params['user']) && strlen($params['user']) > 0) {
 			$sql .= " AND (C.CardNum=" . $params['user'] . ")";
 		}
@@ -63,7 +64,24 @@ class History extends CI_Model {
 			list($SitePanelId, $Point) = explode('_', $params['panel']);
 			$sql .= " AND (R.SitePanelId = " . intval($SitePanelId) . ") AND (R.Point = " . intval($Point) . ")";
 		}
+		if(isset($params['type']) && strlen($params['type']) > 0) {
+			if($params['type'] == 'morning') {
+				$sql .= " AND (RTime < 120000)";
+			}
+			else {
+				$sql .= " AND (RTime >= 120000)";
+			}
+		}
 
+		switch($params['sortBy']) {
+		case 'user':
+			$sql .= " ORDER BY C.LastName ASC, C.FirstName ASC";
+			break;
+		case 'time':
+		default:
+			$sql .= " ORDER BY H.RDate ASC, H.RTime ASC";
+			break;
+		}
 
 		$query = $ci->db->query($sql);
 		$list = Array();

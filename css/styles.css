@@ -38,3 +38,10 @@ div#footer {
 	background-image:url('../images/print_icon.gif') !important;
 }
 
+.greenBG {
+	background-color: #9c9;
+}
+
+.redBG {
+	background-color: #c99;
+}

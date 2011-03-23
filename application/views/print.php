@@ -30,7 +30,7 @@ function doPrint() {
 	$sec = substr($time, 4, 2);
 ?>
   <tr>
-  <td><?=$record->LastName . ', ' . $record->FirstName;?></td>
+  <td><?=$record->LN . ', ' . $record->FN;?></td>
   <td><?=$month.'/'.$day.'/'.$year;?></td>
   <td><?=$hour.':'.$min.':'.$sec;?></td>
   <td><?=$record->CardNumber;?></td>

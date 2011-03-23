@@ -45,7 +45,7 @@ Ext.onReady(function() {
 					autoLoad: true,
 					url: 'index.php/home/getUserList',
 					root: 'users',
-					fields: [ 'CardNumber', {name: 'FullName', mapping: 'LastName + ", " + obj.FirstName'}]
+					fields: [ 'CardNumber', {name: 'FullName', mapping: 'LN + ", " + obj.FN'}]
 				})
 			},
 			{
@@ -73,7 +73,13 @@ Ext.onReady(function() {
 					var user = Ext.getCmp('user').getValue();
 					var fromDate = $('#fromDate').val();
 					var toDate = $('#toDate').val();
-					var wib = $('#userWIBReport');
+					var wib;
+					if($('#userWIBReport').attr('checked')) {
+						wib = 1;
+					}
+					else {
+						wib = 0;
+					}
 					resultsStore.baseParams = {
 						user: user,
 						fromDate: fromDate,
@@ -137,7 +143,8 @@ Ext.onReady(function() {
 			},
 			{
 				fieldLabel: 'WIB Report',
-				xtype: 'checkbox'
+				xtype: 'checkbox',
+				id: 'attendanceWIBReport'
 			}
 				
 		],
@@ -148,7 +155,14 @@ Ext.onReady(function() {
 					var type = Ext.getCmp('attendanceReportType').getValue();
 					var sortBy = Ext.getCmp('sortBy').getValue();
 					var date = $('#attendanceReportDate').val();
-					var wib = $('#userWIBReport');
+					var wib;
+					if($('#attendanceWIBReport').attr('checked')) {
+						wib = 1;
+					}
+					else {
+						wib = 0;
+					}
+					alert(sortBy);
 					resultsStore.baseParams = {
 						type: type,
 						sortBy: sortBy,
@@ -213,7 +227,7 @@ Ext.onReady(function() {
 
 	var resultsStore = new Ext.data.JsonStore({
 		url: 'index.php/home/runReport',
-		fields: ['RecNum', {name: 'name', mapping: 'LastName + ", " + obj.FirstName'},'CardNumber','panel', 'rdate', 'rtime'],
+		fields: ['RecNum', {name: 'name', mapping: 'LN + ", " + obj.FN'},'CardNumber','panel', 'rdate', 'rtime'],
 		root: 'records',
 		method: 'POST',
 		totalProperty: 'totalCount',
@@ -250,7 +264,19 @@ Ext.onReady(function() {
 				window.open('index.php/home/printList', 'print_win', 'width=800,height=500,toolbars=no,scrollbars=yes');
 			}
         	}],
-		
+		viewConfig: {
+    			getRowClass: function(record, rowIndex, rp, ds){ // rp = rowParams
+
+				var rtime = parseInt(record.get('rtime'));
+				if(rtime < 120000) {
+					return('greenBG');
+				}
+				else {
+					return('redBG');
+				}
+				
+    			}
+		}
 	});
 
 	var resultsPanel = new Ext.Panel({

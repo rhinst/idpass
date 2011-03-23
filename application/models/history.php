@@ -34,7 +34,7 @@ class History extends CI_Model {
 			$min = substr($time, 2, 2);
 			$sec = substr($time, 4, 2);
 
-			$worksheet->write($row,0,$record->LastName . ', ' . $record->FirstName);
+			$worksheet->write($row,0,$record->LN . ', ' . $record->FN);
 			$worksheet->write($row,1,"$month/$day/$year");
 			$worksheet->write($row,2,"$hour:$min:$sec");
 			$worksheet->write($row,3,$record->CardNumber);
@@ -46,42 +46,125 @@ class History extends CI_Model {
 	}
 
 	function getList($params = Array()) {
+
 		$ci =& get_instance();
 
-		$sql = "SELECT C.FirstName, C.LastName, CLng(C.CardNum) as CardNumber, R.Name as panel, H.RDate as rdate, H.RTime as rtime FROM (History H LEFT OUTER JOIN Cards C ON (C.CardNum=H.CardNumber)) LEFT OUTER JOIN Readers R ON (R.SitePanelId=H.SitePanelId AND CLng(R.Point)=(CLng(H.TransInfo)+1)) WHERE 1=1 AND C.CardNum > 0 ";
-		if(isset($params['user']) && strlen($params['user']) > 0) {
-			$sql .= " AND (C.CardNum=" . $params['user'] . ")";
-		}
-		if(isset($params['fromDate']) && strlen($params['fromDate']) > 0) {
-			list($month,$day,$year) = explode('/', $params['fromDate']);
-			$sql .= " AND (RDate >= " . intval($year.$month.$day) . ")";
-		}
-		if(isset($params['toDate']) && strlen($params['toDate']) > 0) {
-			list($month,$day,$year) = explode('/', $params['toDate']);
-			$sql .= " AND (RDate <= " . intval($year.$month.$day) . ")";
-		}
-		if(isset($params['panel']) && strlen($params['panel']) > 0) {
-			list($SitePanelId, $Point) = explode('_', $params['panel']);
-			$sql .= " AND (R.SitePanelId = " . intval($SitePanelId) . ") AND (R.Point = " . intval($Point) . ")";
-		}
-		if(isset($params['type']) && strlen($params['type']) > 0) {
-			if($params['type'] == 'morning') {
-				$sql .= " AND (RTime < 120000)";
+		$from = "(History H LEFT OUTER JOIN Cards C ON (C.CardNum=H.CardNumber)) LEFT OUTER JOIN Readers R ON (R.SitePanelId=H.SitePanelId AND CLng(R.Point)=(CLng(H.TransInfo)+1))";
+
+		if($params['wib'] == '1') {
+
+			$selectFields = Array(
+				'DISTINCT(RDate)',
+				'StrConv(C.FirstName, 3) as FN',
+				'StrConv(C.LastName, 3) as LN',
+				'CLng(C.CardNum) as CardNumber',
+				'MIN(R.Name) as panel',
+				'H.RDate as rdate',
+				'MIN(H.RTime) as rtime',
+			);
+
+			$where = "(H.CardNumber > 0) AND (H.RTime<120000)";
+			
+			if($params['user']) {
+				$where .= " AND (H.CardNumber=" . $params['user'] . ")";
 			}
-			else {
-				$sql .= " AND (RTime >= 120000)";
+
+			if(isset($params['fromDate']) && strlen($params['fromDate']) > 0) {
+				list($month,$day,$year) = explode('/', $params['fromDate']);
+				$month = str_pad($month, 2, '0', STR_PAD_LEFT);
+				$day = str_pad($day, 2, '0', STR_PAD_LEFT);
+				$where .= " AND (H.RDate >= " . intval($year.$month.$day) . ")";
 			}
+			if(isset($params['toDate']) && strlen($params['toDate']) > 0) {
+				list($month,$day,$year) = explode('/', $params['toDate']);
+				$where .= " AND (H.RDate <= " . intval($year.$month.$day) . ")";
+			}
+
+			$groupBy = "CLng(C.CardNum), H.RDate, StrConv(C.FirstName, 3), StrConv(C.LastName, 3)";
+
+			$sql1 = "SELECT " . implode(',', $selectFields) . " FROM $from WHERE $where GROUP BY $groupBy";
+
+			$selectFields = Array(
+				'DISTINCT(RDate)',
+				'StrConv(C.FirstName, 3) as FN',
+				'StrConv(C.LastName, 3) as LN',
+				'CLng(C.CardNum) as CardNumber',
+				'MIN(R.Name) as panel',
+				'H.RDate as rdate',
+				'MIN(H.RTime) + CLng((80500 - 75500 + 1) * Rnd + 75500) as rtime',
+			);
+
+
+			$sql2 = "SELECT " . implode(',', $selectFields) . " FROM $from WHERE $where GROUP BY $groupBy";
+
+			$sql = "($sql1) UNION ($sql2)";
+			
+
+			switch($params['sortBy']) {
+			case 'user':
+				$sql .= " ORDER BY LN ASC, FN ASC, rdate ASC, rtime ASC";
+				break;
+			case 'time':
+				$sql .= " ORDER BY rdate ASC, rtime ASC";
+				break;
+			default:
+				$sql .= " ORDER BY rdate ASC, rtime ASC";
+			}
+		}
+		else {
+			$selectFields = Array(
+				'StrConv(C.FirstName, 3) as FN', 
+				'StrConv(C.LastName, 3) as LN',
+				'CLng(C.CardNum) as CardNumber',
+				'R.Name as panel',
+				'H.RDate as rdate', 
+				'H.RTime as rtime',
+			);
+
+			$sql = "SELECT " . implode(',', $selectFields) . " FROM $from WHERE 1=1 AND C.CardNum > 0 ";
+
+			if(isset($params['user']) && strlen($params['user']) > 0) {
+				$sql .= " AND (C.CardNum=" . $params['user'] . ")";
+			}
+			if(isset($params['fromDate']) && strlen($params['fromDate']) > 0) {
+				list($month,$day,$year) = explode('/', $params['fromDate']);
+				$month = str_pad($month, 2, '0', STR_PAD_LEFT);
+				$day = str_pad($day, 2, '0', STR_PAD_LEFT);
+				$sql .= " AND (H.RDate >= " . intval($year.$month.$day) . ")";
+			}
+			if(isset($params['toDate']) && strlen($params['toDate']) > 0) {
+				list($month,$day,$year) = explode('/', $params['toDate']);
+				$sql .= " AND (H.RDate <= " . intval($year.$month.$day) . ")";
+			}
+			if(isset($params['panel']) && strlen($params['panel']) > 0) {
+				list($SitePanelId, $Point) = explode('_', $params['panel']);
+				$sql .= " AND (R.SitePanelId = " . intval($SitePanelId) . ") AND (R.Point = " . intval($Point) . ")";
+			}
+			if(isset($params['type']) && strlen($params['type']) > 0) {
+				if($params['type'] == 'morning') {
+					$sql .= " AND (H.RTime < 120000)";
+				}
+				else {
+					$sql .= " AND (H.RTime >= 120000)";
+				}
+			}
+
+			switch($params['sortBy']) {
+			case 'user':
+				$sql .= " ORDER BY C.LastName ASC, C.FirstName ASC";
+				break;
+			case 'time':
+			default:
+				$sql .= " ORDER BY H.RDate ASC, H.RTime ASC";
+				break;
+			}
+	
 		}
 
-		switch($params['sortBy']) {
-		case 'user':
-			$sql .= " ORDER BY C.LastName ASC, C.FirstName ASC";
-			break;
-		case 'time':
-		default:
-			$sql .= " ORDER BY H.RDate ASC, H.RTime ASC";
-			break;
-		}
+
+		$fh = fopen("c:/tmp/test.txt", "w");
+		fwrite($fh, $sql);
+		fclose($fh);
 
 		$query = $ci->db->query($sql);
 		$list = Array();

@@ -8,7 +8,7 @@ class Card extends CI_Model {
 
 	function getList() {
 		$ci =& get_instance();
-		$query = $ci->db->query("SELECT CLng(CardNum) as CardNumber,FirstName,LastName FROM Cards ORDER BY LastName ASC,FirstName ASC");
+		$query = $ci->db->query("SELECT CLng(CardNum) as CardNumber, StrConv(FirstName, 3) as FN,StrConv(LastName, 3) as LN FROM Cards ORDER BY LastName ASC,FirstName ASC");
 		$list = Array();
 		foreach($query->result() as $item) {
 			$list[] = $item;

@@ -113,7 +113,7 @@ Ext.onReady(function() {
 					fields: [ 'label', 'value'],
 					data: [
 						['Morning Report', 'morning'],
-						['Evening Report', 'evening'],
+						['Evening Report', 'evening']
 					]
 				})
 			},
@@ -131,7 +131,7 @@ Ext.onReady(function() {
 					fields: [ 'label', 'value'],
 					data: [
 						['Time', 'time'],
-						['User', 'user'],
+						['User', 'user']
 					]
 				})
 			},

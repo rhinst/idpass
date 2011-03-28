@@ -49,6 +49,7 @@ class History extends CI_Model {
 
 		$ci =& get_instance();
 
+
 		$from = "(History H LEFT OUTER JOIN Cards C ON (C.CardNum=H.CardNumber)) LEFT OUTER JOIN Readers R ON (R.SitePanelId=H.SitePanelId AND CLng(R.Point)=(CLng(H.TransInfo)+1))";
 
 		if($params['wib'] == '1') {
@@ -60,7 +61,9 @@ class History extends CI_Model {
 				'CLng(C.CardNum) as CardNumber',
 				'MIN(R.Name) as panel',
 				'H.RDate as rdate',
+				'1 as unused',
 				'MIN(H.RTime) as rtime',
+				'1 as sorter'
 			);
 
 			$where = "(H.CardNumber > 0) AND (H.RTime<120000)";
@@ -84,6 +87,8 @@ class History extends CI_Model {
 
 			$sql1 = "SELECT " . implode(',', $selectFields) . " FROM $from WHERE $where GROUP BY $groupBy";
 
+			$endTime = "CSTR(15) & CSTR(29 + (H.RDate MOD 3)) & STRING(2 - LEN(CSTR(H.RDate MOD 60)), '0') & CSTR(H.RDate MOD 60)";
+
 			$selectFields = Array(
 				'DISTINCT(RDate)',
 				'StrConv(C.FirstName, 3) as FN',
@@ -91,24 +96,27 @@ class History extends CI_Model {
 				'CLng(C.CardNum) as CardNumber',
 				'MIN(R.Name) as panel',
 				'H.RDate as rdate',
-				'MIN(H.RTime) + 80000 as rtime',
+				'MIN(H.RTime) as unused',
+				 $endTime . ' as rtime',
+				 '2 AS sorter'
 			);
 
 
 			$sql2 = "SELECT " . implode(',', $selectFields) . " FROM $from WHERE $where GROUP BY $groupBy";
 
+
 			$sql = "($sql1) UNION ($sql2)";
-			
+
 
 			switch($params['sortBy']) {
 			case 'user':
-				$sql .= " ORDER BY LN ASC, FN ASC, rdate ASC, rtime ASC";
+				$sql .= " ORDER BY LN ASC, FN ASC, rdate ASC, sorter ASC";
 				break;
 			case 'time':
-				$sql .= " ORDER BY rdate ASC, rtime ASC";
+				$sql .= " ORDER BY rdate ASC, sorter ASC";
 				break;
 			default:
-				$sql .= " ORDER BY rdate ASC, rtime ASC";
+				$sql .= " ORDER BY rdate ASC, sorter ASC";
 			}
 		}
 		else {

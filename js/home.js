@@ -201,10 +201,16 @@ Ext.onReady(function() {
 				})
 			},
 			{
-				fieldLabel: 'Date',
+				fieldLabel: 'From Date',
 			        width: 100,
 				xtype: 'datefield',
-				id: 'panelDate'
+				id: 'panelFromDate'
+			},
+			{
+				fieldLabel: 'To Date',
+			        width: 100,
+				xtype: 'datefield',
+				id: 'panelToDate'
 			}
 				
 		],
@@ -213,11 +219,13 @@ Ext.onReady(function() {
 				text: 'Run Report',
 				handler: function() {
 					var panel = Ext.getCmp('panel').getValue();
-					var panelDate = $('#panelDate').val();
+
+					var panelFromDate = $('#panelFromDate').val();
+					var panelToDate = $('#panelToDate').val();
 					resultsStore.baseParams = {
 						panel: panel,
-						fromDate: panelDate,
-						toDate: panelDate
+						fromDate: panelFromDate,
+						toDate: panelToDate
 					};
 					resultsStore.reload();
 				}

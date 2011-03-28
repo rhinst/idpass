@@ -91,7 +91,7 @@ class History extends CI_Model {
 				'CLng(C.CardNum) as CardNumber',
 				'MIN(R.Name) as panel',
 				'H.RDate as rdate',
-				'MIN(H.RTime) + CLng((80500 - 75500 + 1) * Rnd + 75500) as rtime',
+				'MIN(H.RTime) + 80000 as rtime',
 			);
 
 
